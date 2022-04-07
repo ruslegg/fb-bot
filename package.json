@@ -1,0 +1,19 @@
+{
+  "name": "dana-script",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "make": "npm run make",
+    "import": "npx electron-forge import",
+    "build": "webpack --config ./webpack.config.js",
+    "start": "npm run build && electron ./src/electron.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chromedriver": "^97.0.3",
+    "selenium-webdriver": "^4.1.1"
+  }
+}
