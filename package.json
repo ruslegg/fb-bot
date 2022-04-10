@@ -5,8 +5,10 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "startRO": "COUNTRY=RO node index.js",
-    "startPL": "COUNTRY=PL node index.js"
+    "startRO": "EDITION=RO node index.js",
+    "startPL": "EDITION=PL node index.js",
+    "startLondonRO": "EDITION=LONDON_RO node index.js",
+    "startLondonPL": "EDITION=LONDON_PL node index.js"
   },
   "author": "",
   "license": "ISC",

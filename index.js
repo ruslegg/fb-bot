@@ -8,6 +8,37 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.tz.setDefault("Europe/London");
 
+const editionFiles = {
+  RO: {
+    textPath: "./dana/textRo.txt",
+    linksPath: "./dana/linksRomanian.txt",
+    logFile: `./dana/executarilePrecedente/statusRO_${dayjs().format(
+      "MMM D, YYYY h:mm A"
+    )}.txt`,
+  },
+  PL: {
+    textPath: "./dana/textPl.txt",
+    linksPath: "./dana/linksPoland.txt",
+    logFile: `./dana/executarilePrecedente/statusPL_${dayjs().format(
+      "MMM D, YYYY h:mm A"
+    )}.txt`,
+  },
+  LONDON_RO: {
+    textPath: "./dana/textLondonRo.txt",
+    linksPath: "./dana/linksLondonRomania.txt",
+    logFile: `./dana/executarilePrecedente/statusLondonRO${dayjs().format(
+      "MMM D, YYYY h:mm A"
+    )}.txt`,
+  },
+  LONDON_PL: {
+    textPath: "./dana/textLondonPl.txt",
+    linksPath: "./dana/linksLondonPoland.txt",
+    logFile: `./dana/executarilePrecedente/statusLondonPL${dayjs().format(
+      "MMM D, YYYY h:mm A"
+    )}.txt`,
+  },
+};
+
 let options = new chrome.Options();
 
 options.addArguments("--disable-notifications");
@@ -181,27 +212,6 @@ async function selectPostTextField(driver) {
   await textFieldElements[0].click();
 }
 
-async function sendRomanianPosts() {
-  await sendPosts({
-    textPath: "./dana/textRo.txt",
-    linksPath: "./dana/linksRomanian.txt",
-    logFile: `./dana/executarilePrecedente/statusRO_${dayjs().format(
-      "MMM D, YYYY h:mm A"
-    )}.txt`,
-  });
-}
-
-async function sendPolandPosts() {
-  await sendPosts({
-    textPath: "./dana/textPl.txt",
-    linksPath: "./dana/linksPoland.txt",
-    logFile: `./dana/executarilePrecedente/statusPL_${dayjs().format(
-      "MMM D, YYYY h:mm A"
-    )}.txt`,
-  });
-}
-
 (async function run() {
-  if (process.env.COUNTRY === "RO") await sendRomanianPosts();
-  else if (process.env.COUNTRY === "PL") await sendPolandPosts();
+  await sendPosts(editionFiles[process.env.EDITION]);
 })();
