@@ -5,3 +5,4 @@ git stash
 git pull
 git stash pop
 echo "Update complete"
+read
