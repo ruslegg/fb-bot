@@ -43,6 +43,7 @@ let options = new chrome.Options();
 
 options.addArguments("--disable-notifications");
 options.addArguments("--disable-popup-blocking");
+options.addArguments("--kiosk");
 
 async function sendPosts({ textPath, linksPath, logFile }) {
   const currentLogPath = "./current.txt";
