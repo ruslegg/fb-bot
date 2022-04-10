@@ -5,15 +5,14 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "make": "npm run make",
-    "import": "npx electron-forge import",
-    "build": "webpack --config ./webpack.config.js",
-    "start": "npm run build && electron ./src/electron.js"
+    "startRO": "COUNTRY=RO node index.js",
+    "startPL": "COUNTRY=PL node index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "chromedriver": "^97.0.3",
+    "dayjs": "^1.11.0",
     "selenium-webdriver": "^4.1.1"
   }
 }

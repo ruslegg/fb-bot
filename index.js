@@ -1,20 +1,29 @@
-// import { globby } from "globby";
-
-const globby = import("globby");
-
 const { Builder, By, Key, until } = require("selenium-webdriver");
 let chrome = require("selenium-webdriver/chrome");
 const fs = require("fs");
+const dayjs = require("dayjs");
+const utc = require("dayjs/plugin/utc");
+const timezone = require("dayjs/plugin/timezone"); // dependent on utc plugin
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.tz.setDefault("Europe/London");
 
 let options = new chrome.Options();
 
 options.addArguments("--disable-notifications");
 options.addArguments("--disable-popup-blocking");
 
-async function sendPosts({ textPath, linksPath }) {
+async function sendPosts({ textPath, linksPath, logFile }) {
+  const currentLogPath = "./current.txt";
   const linksString = fs.readFileSync(linksPath, "utf8");
   const links = linksString.split("\n");
-  const message = fs.readFileSync(textPath, "utf8");
+  const postMessage = fs.readFileSync(textPath, "utf8");
+
+  console.log(postMessage);
+
+  if (fs.existsSync(currentLogPath)) {
+    fs.unlinkSync(currentLogPath);
+  }
 
   let driver = await new Builder()
     .withCapabilities({
@@ -58,49 +67,78 @@ async function sendPosts({ textPath, linksPath }) {
     for (const link of links) {
       await driver.get(link);
       await timeout(1000);
-      await driver.executeScript("window.scrollTo(0, 600)");
-      // await timeout(50000);
+      const title = await (await driver.getTitle())
+        .replace("| Facebook", "")
+        .replace(/\(.*\)/, "");
 
-      await selectPostTextField(driver);
+      const message = `Postul in grupul [${title}]`;
+      try {
+        // await timeout(50000);
 
-      await timeout(5000);
-
-      await driver.switchTo().activeElement().sendKeys(message);
-      await timeout(2000);
-
-      if (await isBlockDisabled(driver)) {
-        await escape(driver);
-        await escape(driver);
-        await timeout(1000);
         await selectPostTextField(driver);
+
+        await timeout(5000);
+
+        const currentActive = await driver.switchTo().activeElement();
+
+        await currentActive.sendKeys(postMessage);
+        await timeout(2000);
+
         if (await isBlockDisabled(driver)) {
           await escape(driver);
+          await escape(driver);
+          await timeout(1000);
+          await selectPostTextField(driver);
+          if (await isBlockDisabled(driver)) {
+            await escape(driver);
+          }
         }
+        await timeout(2000);
+
+        await driver
+          .findElement(By.css('div[aria-label="Foto/Video"]'))
+          .click();
+
+        const imagesRaw = await fs.promises.readdir("./dana/imagini");
+        const images = imagesRaw
+          .filter(
+            (image) =>
+              image.endsWith(".png") ||
+              image.endsWith(".jpg") ||
+              image.endsWith(".jpeg")
+          )
+          .map((image) => `${process.cwd()}/dana/imagini/${image}`)
+          .join(" \n ");
+
+        await driver
+          .findElement(By.css(`input[multiple][type="file"]`))
+          .sendKeys(images);
+
+        const submitElement = await submit(driver);
+
+        try {
+          await driver.wait(until.elementIsNotVisible(submitElement), 10000);
+        } catch (e) {
+          if (e.name === "StaleElementReferenceError") {
+            console.log(`${message} a fost postat cu succes`);
+            fs.appendFileSync(
+              currentLogPath,
+              `${message} a fost postat cu succes\n`
+            );
+          } else {
+            throw e;
+          }
+        }
+
+        await timeout(5000);
+      } catch (e) {
+        console.log(`${message} a esuat ${e}`);
+        fs.appendFileSync(currentLogPath, `${message} a esuat ${e}\n`);
       }
-      await timeout(2000);
-
-      await driver.findElement(By.css('div[aria-label="Foto/Video"]')).click();
-
-      const imagesRaw = await fs.promises.readdir("./images");
-      const images = imagesRaw
-        .filter(
-          (image) =>
-            image.endsWith(".png") ||
-            image.endsWith(".jpg") ||
-            image.endsWith(".jpeg")
-        )
-        .map((image) => `${process.cwd()}/images/${image}`)
-        .join(" \n ");
-
-      await driver
-        .findElement(By.css(`input[multiple][type="file"]`))
-        .sendKeys(images);
-
-      await submit(driver);
-
-      await timeout(5000);
     }
-    await timeout(100000);
+    console.log("Done");
+    fs.appendFileSync(currentLogPath, `Done`);
+    fs.copyFileSync(currentLogPath, logFile);
   } finally {
     await driver.quit();
   }
@@ -123,31 +161,47 @@ async function escape(driver) {
 
 async function submit(driver) {
   await timeout(1000);
-  console.log("clicked");
-  return await driver.findElement(By.css('div[aria-label="Postează"]')).click();
+  const submitElement = await driver.findElement(
+    By.css('div[aria-label="Postează"]')
+  );
+  await submitElement.click();
+  return submitElement;
 }
 
 async function selectPostTextField(driver) {
-  await driver
-    .findElement(
-      By.css('div[data-pagelet="GroupInlineComposer"] div[role="button"] span')
-    )
-    .click();
+  const textFieldElements = await driver.findElements(
+    By.css('div[data-pagelet="GroupInlineComposer"] div[role="button"] span')
+  );
+
+  if (!textFieldElements.length) {
+    await driver.executeScript("window.scrollTo(0, 300)");
+    return await selectPostTextField(driver);
+  }
+
+  await textFieldElements[0].click();
 }
 
 async function sendRomanianPosts() {
-  console.log('start')
   await sendPosts({
-    textPath: "./textRo.txt",
-    linksPath: "./linksRomanian.txt",
+    textPath: "./dana/textRo.txt",
+    linksPath: "./dana/linksRomanian.txt",
+    logFile: `./dana/executarilePrecedente/statusRO_${dayjs().format(
+      "MMM D, YYYY h:mm A"
+    )}.txt`,
   });
 }
 
-function sendPolandPosts() {
+async function sendPolandPosts() {
   await sendPosts({
-    textPath: "./textPl.txt",
-    linksPath: "./linksPoland.txt",
+    textPath: "./dana/textPl.txt",
+    linksPath: "./dana/linksPoland.txt",
+    logFile: `./dana/executarilePrecedente/statusPL_${dayjs().format(
+      "MMM D, YYYY h:mm A"
+    )}.txt`,
   });
 }
 
-module.exports = { sendPolandPosts, sendRomanianPosts };
+(async function run() {
+  if (process.env.COUNTRY === "RO") await sendRomanianPosts();
+  else if (process.env.COUNTRY === "PL") await sendPolandPosts();
+})();

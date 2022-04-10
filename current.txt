@@ -1,0 +1,12 @@
+Postul in grupul [ Români in kettering ] a fost postat cu succes
+Postul in grupul [ Romani in kettering ] a fost postat cu succes
+Postul in grupul [ Români si Moldoveni in Northampton ] a fost postat cu succes
+Postul in grupul [ Romani in Northampton, Kettering, Peterborough!!! ] a fost postat cu succes
+Postul in grupul [ Romani in Kettering Anglia ] a fost postat cu succes
+Postul in grupul [ Romani in Kettering, Northamptonshire ] a esuat NoSuchElementError: no such element: Unable to locate element: {"method":"css selector","selector":"div[aria-label="Foto/Video"]"}
+  (Session info: chrome=100.0.4896.75)
+Postul in grupul [ MOLDOVENI IN UK KETTERING ] a fost postat cu succes
+Postul in grupul [ 🇲🇩Moldovenii in Northampton, Corby , Daventry, Kettering, Rugby 🇬🇧 ] a fost postat cu succes
+Postul in grupul [ Romani in Wellingborough,Kettering,Corby,Walsall,Rugby & around ] a esuat NoSuchElementError: no such element: Unable to locate element: {"method":"css selector","selector":"div[aria-label="Foto/Video"]"}
+  (Session info: chrome=100.0.4896.75)
+Done
