@@ -73,7 +73,7 @@ async function sendPosts({ textPath, linksPath, logFile }) {
     await driver.get("https://facebook.com");
     //Store the ID of the original window
     const originalWindow = await driver.getWindowHandle();
-    await driver.wait(until.titleIs("Facebook – log in or sign up"), 100000);
+    await driver.wait(until.titleIs("Log in to Facebook"), 100000);
     await timeout(1000);
 
     const cookieBanners = await driver.findElements(
